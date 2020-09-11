@@ -144,6 +144,7 @@ elif [ "$EAP_MODE" = "supplicant" ] ; then
   /usr/bin/logger -st "pfatt" "cabling should look like this:"
   /usr/bin/logger -st "pfatt" "  ONT---[] [$ONT_IF]$HOST"
   /usr/bin/logger -st "pfatt" "creating vlan node and ngeth0 interface..."
+  /usr/local/bin/php -r "pfSense_ngctl_attach('.', '$ONT_IF');
   /usr/sbin/ngctl mkpeer $ONT_IF: vlan lower downstream
   /usr/sbin/ngctl name $ONT_IF:lower vlan0
   /usr/sbin/ngctl mkpeer vlan0: eiface vlan0 ether
@@ -151,6 +152,7 @@ elif [ "$EAP_MODE" = "supplicant" ] ; then
   /usr/sbin/ngctl msg ngeth0: set $RG_ETHER_ADDR
 
   /usr/bin/logger -st "pfatt" "enabling promisc for $ONT_IF..."
+  /sbin/ifconfig $ONT_IF ether $EAP_SUPPLICANT_IDENTITY 
   /sbin/ifconfig $ONT_IF up
   /sbin/ifconfig $ONT_IF promisc
 
@@ -172,7 +174,7 @@ elif [ "$EAP_MODE" = "supplicant" ] ; then
     enable_network 0\
   "
 
-  WPA_DAEMON_CMD="/usr/sbin/wpa_supplicant -Dwired -ingeth0 -B -C /var/run/wpa_supplicant"
+  WPA_DAEMON_CMD="/usr/sbin/wpa_supplicant -Dwired -i$ONT_IF -B -C /var/run/wpa_supplicant"
 
   # kill any existing wpa_supplicant process
   PID=$(pgrep -f "wpa_supplicant.*ngeth0")
